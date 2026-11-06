@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Python Number Challenge</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f6fb;--card:#fff;--text:#1d2433;--muted:#5d6678;--accent:#3776ab;--accent2:#ffd43b;--ok:#2e9e5b;--bad:#d64545;--line:#d9deea}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141d;--card:#1a2030;--text:#eef1f8;--muted:#a3adc2;--accent:#5fa0d6;--accent2:#ffd43b;--ok:#3cc277;--bad:#ef6a6a;--line:#2b3348}}
+:root[data-theme="dark"]{--bg:#10141d;--card:#1a2030;--text:#eef1f8;--muted:#a3adc2;--accent:#5fa0d6;--accent2:#ffd43b;--ok:#3cc277;--bad:#ef6a6a;--line:#2b3348}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:20px 16px 40px}
+header{text-align:center;margin-bottom:16px}
+h1{margin:0 0 4px;font-size:clamp(24px,5vw,38px)}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:0}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 16px;margin:16px 0;font-weight:600;flex-wrap:wrap}
+.bar b{color:var(--accent)}
+button{font:inherit;cursor:pointer}
+.reset{background:none;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:6px 14px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.tile{aspect-ratio:1;border:none;border-radius:16px;background:var(--accent);color:#fff;font-size:clamp(26px,7vw,48px);font-weight:800;box-shadow:0 4px 0 rgba(0,0,0,.2);transition:transform .12s}
+.tile:hover:not(:disabled){transform:translateY(-3px) scale(1.04)}
+.tile:disabled{cursor:default;box-shadow:none}
+.tile.ok{background:var(--ok)}
+.tile.bad{background:var(--bad)}
+.overlay{position:fixed;inset:0;background:rgba(10,14,24,.65);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.overlay.show{display:flex}
+.modal{background:var(--card);border-radius:20px;max-width:640px;width:100%;max-height:92vh;overflow:auto;padding:22px;border-top:8px solid var(--accent2)}
+.tag{display:inline-block;background:var(--accent);color:#fff;border-radius:20px;padding:3px 12px;font-size:13px;font-weight:600;margin-left:8px}
+.qn{font-size:15px;color:var(--muted);font-weight:700}
+.q{font-size:clamp(19px,4vw,25px);font-weight:700;margin:12px 0 16px;line-height:1.35}
+code{background:var(--bg);border:1px solid var(--line);padding:1px 6px;border-radius:6px;font-family:Consolas,monospace}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);color:var(--text);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:clamp(16px,3.5vw,20px)}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 20%,var(--card))}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 20%,var(--card))}
+.fb{margin-top:6px;font-weight:600;min-height:24px}
+.go{margin-top:10px;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:10px 24px;font-weight:700;display:none}
+.final{text-align:center}
+.final .big{font-size:56px;font-weight:800;color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🐍 Python <span>Number Challenge</span></h1>
+    <p class="sub">Unit 1 · Lesson 1 &amp; Lesson 2 — pick a number to reveal your question!</p>
+  </header>
+  <div class="bar">
+    <div>Score: <b id="score">0</b> / 20</div>
+    <div>Answered: <b id="done">0</b> / 20</div>
+    <button class="reset" id="reset">↻ New game</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="overlay" id="ov"><div class="modal" id="modal"></div></div>
+
+<script>
+const Q = [
+ // Lesson 1
+ {l:"L2",q:"What will <code>print('Hello')</code> display on the screen?",o:["Hello","print('Hello')","'Hello' with the quotes","Nothing"],a:0},
+ {l:"L2",q:"Text inside <code>print()</code> can be written using…",o:["Only single quotes","Only double quotes","Single or double quotes","No quotes at all"],a:2},
+ {l:"L1",q:"Who invented Python?",o:["Bill Gates","Steve Jobs","Guido van Rossum","Alan Turing"],a:2},
+ {l:"L2",q:"What does the program do when it reaches <code>input()</code>?",o:["Ends immediately","Pauses until the user submits a value","Prints an empty line","Deletes the code"],a:1},
+ {l:"L1",q:"What is an algorithm?",o:["A type of computer screen","A set of well-defined instructions that solves a problem step by step","A Python error message","A kind of keyboard"],a:1},
+ {l:"L2",q:"How will these two statements appear?<br><code>print('Hi')</code><br><code>print('Bye')</code>",o:["HiBye on one line","Hi on one line and Bye on the next line","Only Bye","An error message"],a:1},
+ {l:"L1",q:"What is a flowchart?",o:["A diagram that shows the steps of a process in the correct order","A type of Python error","A program that runs automatically","A list of computer parts"],a:0},
+ {l:"L2",q:"Which function asks the user to type their name?",o:["<code>print()</code>","<code>run()</code>","<code>save()</code>","<code>input()</code>"],a:3},
+ {l:"L1",q:"In a flowchart, the <b>diamond</b> shape represents…",o:["A yes/no decision point","Start","Output only","A calculation"],a:0},
+ {l:"L1",q:"The <b>parallelogram</b> in a flowchart is used for…",o:["Start or End","Decisions","Input / Output","Process / Action"],a:2},
+ // Lesson 2
+ {l:"L2",q:"Which button do you click in BlockPy to save your program to your computer?",o:["Run","Download","Toolbox","Console"],a:1},
+ {l:"L2",q:"Which line has a mistake?",o:["<code>print(Python)</code>","<code>print('Python')</code>","<code>print(\"Python\")</code>","<code>input('Python')</code>"],a:0},
+ {l:"L2",q:"Which program prints <i>Python</i> on one line and <i>is fun</i> on the next line?",o:["<code>print('Python is fun')</code>","<code>print('Python')</code> then <code>print('is fun')</code>","<code>input('Python')</code> then <code>input('is fun')</code>","<code>print(Python, is fun)</code>"],a:1},
+ {l:"L2",q:"What does the <code>input()</code> function do?",o:["Prints a message in red","Lets the user type data using the keyboard","Saves the project","Deletes the code"],a:1},
+ {l:"L2",q:"Which line is written correctly to display text?",o:["<code>print(My First Python Program)</code>","<code>print 'My First Python Program'</code>","<code>print('My First Python Program')</code>","<code>Print[My First Python Program]</code>"],a:2},
+ {l:"L2",q:"In BlockPy, the <b>Toolbox</b> contains…",o:["The program output","Categorized blocks","The saved files","The keyboard"],a:1},
+ {l:"L2",q:"Where do you see the result of your program after clicking Run?",o:["Toolbox","Workspace","Console","Variable"],a:2},
+ {l:"L2",q:"In BlockPy, the <b>Workspace</b> is where you…",o:["Download files","Build your program","Read the output only","Rename the lesson"],a:1},
+ {l:"L2",q:"A student types their name when asked by <code>input()</code>. Which function can then display <i>Hello</i> and the name on the screen?",o:["<code>print()</code>","<code>input()</code>","<code>save()</code>","<code>run()</code>"],a:0},
+ {l:"L2",q:"By default, each <code>print()</code> statement displays its output…",o:["On the same line","On a new line","Only once","In the Toolbox"],a:1}
+];
+
+let order, state, score, done;
+const $ = id => document.getElementById(id);
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+
+function start(){
+  order = shuffle(Q.map((_,i)=>i));   // tile n -> question order[n]
+  state = Array(20).fill(null);
+  score = 0; done = 0;
+  const g = $("grid"); g.innerHTML = "";
+  for (let n=0;n<20;n++){
+    const b = document.createElement("button");
+    b.className = "tile"; b.textContent = n+1; b.id = "t"+n;
+    b.onclick = () => openQ(n);
+    g.appendChild(b);
+  }
+  update(); $("ov").classList.remove("show");
+}
+function update(){ $("score").textContent = score; $("done").textContent = done; }
+
+function openQ(n){
+  const item = Q[order[n]];
+  const opts = shuffle(item.o.map((t,i)=>({t,c:i===item.a})));
+  const m = $("modal");
+  m.innerHTML = `<div class="qn">Question ${n+1}<span class="tag">${item.l==="L1"?"Lesson 1":"Lesson 2"}</span></div>
+    <div class="q">${item.q}</div><div id="opts"></div><div class="fb" id="fb"></div>
+    <button class="go" id="go">Back to numbers ➜</button>`;
+  const box = m.querySelector("#opts");
+  opts.forEach(o=>{
+    const b = document.createElement("button");
+    b.className = "opt"; b.innerHTML = o.t;
+    b.onclick = () => {
+      const right = o.c;
+      box.querySelectorAll(".opt").forEach((x,i)=>{ x.disabled = true; if (opts[i].c) x.classList.add("ok"); });
+      if (!right) b.classList.add("bad");
+      state[n] = right; done++; if (right) score++;
+      const t = $("t"+n); t.disabled = true; t.classList.add(right?"ok":"bad"); t.textContent = right?"✓":"✗";
+      $("fb").textContent = right ? "🎉 Correct! +1 point" : "❌ Not quite — the correct answer is highlighted.";
+      $("fb").style.color = right ? "var(--ok)" : "var(--bad)";
+      update();
+      const go = $("go"); go.style.display = "inline-block";
+      go.onclick = () => { $("ov").classList.remove("show"); if (done===20) finish(); };
+    };
+    box.appendChild(b);
+  });
+  $("ov").classList.add("show");
+}
+
+function finish(){
+  const pct = Math.round(score/20*100);
+  const msg = pct>=90 ? "🏆 Python Master!" : pct>=70 ? "🌟 Great job!" : pct>=50 ? "👍 Good effort — keep practicing!" : "💪 Review the lessons and try again!";
+  $("modal").innerHTML = `<div class="final"><div style="font-size:48px">🐍</div><h2>${msg}</h2>
+    <div class="big">${score} / 20</div><p class="sub">${pct}% correct</p>
+    <button class="go" style="display:inline-block" id="again">Play again ↻</button></div>`;
+  $("again").onclick = start;
+  $("ov").classList.add("show");
+}
+$("reset").onclick = start;
+start();
+</script>
+</body>
+</html>
